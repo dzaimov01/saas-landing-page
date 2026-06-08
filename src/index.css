@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+
+body {
+  @apply bg-base text-fog font-sans antialiased;
+  overflow-x: hidden;
+}
+
+.label {
+  @apply text-xs uppercase tracking-[0.25em] font-semibold;
+  background: linear-gradient(90deg, #7c5cff, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, #b9a8ff 0%, #7c5cff 45%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* glow mesh */
+.mesh {
+  background:
+    radial-gradient(40% 50% at 20% 10%, rgba(124, 92, 255, 0.28), transparent 70%),
+    radial-gradient(40% 50% at 85% 20%, rgba(34, 211, 238, 0.18), transparent 70%);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 60% at 50% 0%, black, transparent 80%);
+}
+
+::selection { background: #7c5cff; color: #08080d; }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #08080d; }
+::-webkit-scrollbar-thumb { background: #25253a; border-radius: 999px; }
