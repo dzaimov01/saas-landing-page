@@ -13,6 +13,12 @@ enum Role {
   MEMBER
 }
 
+enum WorkflowStatus {
+  DRAFT
+  ENABLED
+  DISABLED
+}
+
 model User {
   id            String               @id @default(cuid())
   name          String?
@@ -69,6 +75,46 @@ model Workspace {
   createdAt   DateTime     @default(now())
   memberships Membership[]
   invitations Invitation[]
+  workflows   Workflow[]
+}
+
+model Workflow {
+  id          String         @id @default(cuid())
+  workspaceId String
+  name        String
+  status      WorkflowStatus @default(DRAFT)
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  nodes       WorkflowNode[]
+  edges       WorkflowEdge[]
+
+  @@index([workspaceId])
+}
+
+model WorkflowNode {
+  id         String   @id @default(cuid())
+  workflowId String
+  type       String
+  name       String
+  config     Json
+  positionX  Float
+  positionY  Float
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+}
+
+model WorkflowEdge {
+  id           String   @id @default(cuid())
+  workflowId   String
+  sourceId     String
+  targetId     String
+  sourceHandle String?
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
 }
 
 model Membership {

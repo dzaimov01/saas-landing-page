@@ -1,13 +1,22 @@
-import { EmptyState } from '@/components/app/EmptyState'
+import { redirect } from 'next/navigation'
+import { requireUser, getActiveWorkspace } from '@/lib/session'
+import { listWorkflows } from '@/lib/workflows'
+import { WorkflowList } from '@/components/app/WorkflowList'
 
-export default function WorkflowsHome() {
+export default async function WorkflowsHome() {
+  const user = await requireUser()
+  const active = await getActiveWorkspace(user.id)
+  if (!active) redirect('/login')
+  const workflows = await listWorkflows(active.workspace.id)
   return (
-    <div>
-      <h1 className="mb-6 font-display text-2xl font-bold">Workflows</h1>
-      <EmptyState
-        title="No workflows yet"
-        body="Workflow building arrives in the next release. Your foundation is ready."
-      />
-    </div>
+    <WorkflowList
+      canDelete={active.role !== 'MEMBER'}
+      workflows={workflows.map((w) => ({
+        id: w.id,
+        name: w.name,
+        status: w.status,
+        updatedAt: w.updatedAt.toISOString(),
+      }))}
+    />
   )
 }
