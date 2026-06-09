@@ -1,6 +1,7 @@
 import type { Prisma, WorkflowStatus } from '@prisma/client'
 import { db } from './db'
 import { validateWorkflow } from './steps/validate'
+import { generateToken } from './tokens'
 
 export class WorkflowValidationError extends Error {
   errors: string[]
@@ -50,7 +51,7 @@ export function createWorkflow({
   name: string
 }) {
   return db.workflow.create({
-    data: { workspaceId, createdById: userId, name, status: 'DRAFT' },
+    data: { workspaceId, createdById: userId, name, status: 'DRAFT', webhookToken: generateToken(16) },
   })
 }
 
