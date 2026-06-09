@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   ReactFlow,
   Background,
@@ -30,6 +31,7 @@ export interface BuilderProps {
 }
 
 export function Builder({ workflow, initialNodes, initialEdges, canEdit }: BuilderProps) {
+  const router = useRouter()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [name, setName] = useState(workflow.name)
@@ -120,8 +122,11 @@ export function Builder({ workflow, initialNodes, initialEdges, canEdit }: Build
       setErrors(j.errors ?? ['Validation failed.'])
       return
     }
-    if (res.ok) setSaved(true)
-    else setErrors(['Could not save. Please try again.'])
+    if (res.ok) {
+      setSaved(true)
+      // Invalidate the Router Cache so navigating away and back shows saved state.
+      router.refresh()
+    } else setErrors(['Could not save. Please try again.'])
   }
 
   return (
