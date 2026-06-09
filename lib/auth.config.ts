@@ -7,6 +7,8 @@ import Google from 'next-auth/providers/google'
  * `lib/auth.ts` (Node runtime).
  */
 export const authConfig = {
+  // Required for self-hosted / non-Vercel production (e.g. `next start`, Docker).
+  trustHost: true,
   pages: { signIn: '/login' },
   providers: [
     Google({
