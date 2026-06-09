@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { ArrowRight, Zap, Check } from 'lucide-react'
 
 const container = {
@@ -55,13 +56,13 @@ export default function Hero() {
           variants={rise}
           className="mt-9 flex flex-wrap items-center justify-center gap-4"
         >
-          <a
+          <Link
             href="/signup"
             className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-violet to-cyan px-7 py-3.5 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
           >
             Start free for 14 days{' '}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </a>
+          </Link>
           <a
             href="#features"
             className="rounded-full border border-line px-7 py-3.5 text-sm font-semibold text-fog transition-colors hover:bg-white/5"

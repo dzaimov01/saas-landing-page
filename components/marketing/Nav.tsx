@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 
 export default function Nav() {
@@ -48,18 +49,18 @@ export default function Nav() {
             </a>
           </nav>
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="/login"
               className="hidden text-sm text-muted transition-colors hover:text-fog sm:inline"
             >
               Sign in
-            </a>
-            <a
+            </Link>
+            <Link
               href="/signup"
               className="rounded-full bg-fog px-4 py-2 text-sm font-semibold text-ink transition-transform hover:scale-[1.04]"
             >
               Start free
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -83,16 +84,27 @@ export default function Nav() {
               { href: '#pricing', label: 'Pricing' },
               { href: '#cta', label: 'Customers' },
               { href: '/login', label: 'Sign in' },
-            ].map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2 text-muted hover:bg-white/5 hover:text-fog"
-              >
-                {l.label}
-              </a>
-            ))}
+            ].map((l) =>
+              l.href.startsWith('/') ? (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-muted hover:bg-white/5 hover:text-fog"
+                >
+                  {l.label}
+                </Link>
+              ) : (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2 text-muted hover:bg-white/5 hover:text-fog"
+                >
+                  {l.label}
+                </a>
+              ),
+            )}
           </nav>
         )}
       </div>

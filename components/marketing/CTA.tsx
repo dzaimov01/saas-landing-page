@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export default function CTA() {
@@ -38,13 +39,13 @@ export default function CTA() {
             <p className="mx-auto mt-4 max-w-md text-muted">
               Build your first automation in five minutes. Free for 14 days, no card required.
             </p>
-            <a
+            <Link
               href="/signup"
               className="group mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet to-cyan px-8 py-4 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
             >
               Get started free{' '}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>

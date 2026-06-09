@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { Check } from 'lucide-react'
 
 const plans = [
@@ -96,7 +97,7 @@ export default function Pricing() {
                   <span className="font-display text-5xl font-extrabold">£{price}</span>
                   <span className="text-muted">/mo</span>
                 </div>
-                <a
+                <Link
                   href="/signup"
                   className={`mt-6 block rounded-full py-3 text-center text-sm font-semibold transition-transform hover:scale-[1.02] ${
                     p.featured
@@ -105,7 +106,7 @@ export default function Pricing() {
                   }`}
                 >
                   {p.cta}
-                </a>
+                </Link>
                 <ul className="mt-7 space-y-3">
                   {p.features.map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-fog/90">
