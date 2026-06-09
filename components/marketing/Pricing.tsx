@@ -1,21 +1,41 @@
+'use client'
+
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
 
 const plans = [
   {
-    name: 'Starter', monthly: 0, blurb: 'For individuals automating the basics.',
+    name: 'Starter',
+    monthly: 0,
+    blurb: 'For individuals automating the basics.',
     features: ['3 active workflows', '500 runs / month', 'Core integrations', 'Community support'],
     cta: 'Start free',
   },
   {
-    name: 'Team', monthly: 24, blurb: 'For teams running on automation.', featured: true,
-    features: ['Unlimited workflows', '25,000 runs / month', 'All 300+ integrations', 'Conditional logic & approvals', 'Priority support'],
+    name: 'Team',
+    monthly: 24,
+    blurb: 'For teams running on automation.',
+    featured: true,
+    features: [
+      'Unlimited workflows',
+      '25,000 runs / month',
+      'All integrations',
+      'Conditional logic & approvals',
+      'Priority support',
+    ],
     cta: 'Start 14-day trial',
   },
   {
-    name: 'Scale', monthly: 79, blurb: 'For orgs with serious volume.',
-    features: ['Everything in Team', '250,000 runs / month', 'SSO & SCIM', 'Audit logs & SOC 2 report', 'Dedicated manager'],
+    name: 'Scale',
+    monthly: 79,
+    blurb: 'For orgs with serious volume.',
+    features: [
+      'Everything in Team',
+      '250,000 runs / month',
+      'Roles & audit logs',
+      'Dedicated manager',
+    ],
     cta: 'Talk to sales',
   },
 ]
@@ -34,13 +54,15 @@ export default function Pricing() {
           <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-line bg-surface p-1">
             <button
               onClick={() => setAnnual(false)}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${!annual ? 'bg-fog text-base' : 'text-muted'}`}
+              aria-pressed={!annual}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${!annual ? 'bg-fog text-ink' : 'text-muted'}`}
             >
               Monthly
             </button>
             <button
               onClick={() => setAnnual(true)}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${annual ? 'bg-fog text-base' : 'text-muted'}`}
+              aria-pressed={annual}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${annual ? 'bg-fog text-ink' : 'text-muted'}`}
             >
               Annual <span className="text-cyan">−20%</span>
             </button>
@@ -64,7 +86,7 @@ export default function Pricing() {
                 }`}
               >
                 {p.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet to-cyan px-3 py-1 text-xs font-semibold text-base">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet to-cyan px-3 py-1 text-xs font-semibold text-ink">
                     Most popular
                   </span>
                 )}
@@ -75,9 +97,11 @@ export default function Pricing() {
                   <span className="text-muted">/mo</span>
                 </div>
                 <a
-                  href="#cta"
+                  href="/signup"
                   className={`mt-6 block rounded-full py-3 text-center text-sm font-semibold transition-transform hover:scale-[1.02] ${
-                    p.featured ? 'bg-gradient-to-r from-violet to-cyan text-base' : 'border border-line text-fog hover:bg-white/5'
+                    p.featured
+                      ? 'bg-gradient-to-r from-violet to-cyan text-ink'
+                      : 'border border-line text-fog hover:bg-white/5'
                   }`}
                 >
                   {p.cta}

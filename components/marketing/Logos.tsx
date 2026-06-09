@@ -8,7 +8,10 @@ export default function Logos() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
           {names.map((n) => (
-            <span key={n} className="font-display text-xl font-bold text-fog/35 transition-colors hover:text-fog/70">
+            <span
+              key={n}
+              className="font-display text-xl font-bold text-fog/35 transition-colors hover:text-fog/70"
+            >
               {n}
             </span>
           ))}

@@ -1,10 +1,15 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import { ArrowRight, Zap, Check } from 'lucide-react'
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } } }
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+}
 const rise = {
   hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } },
 }
 
 export default function Hero() {
@@ -13,7 +18,12 @@ export default function Hero() {
       <div className="mesh pointer-events-none absolute inset-0" />
       <div className="grid-overlay pointer-events-none absolute inset-0 h-[600px]" />
 
-      <motion.div variants={container} initial="hidden" animate="show" className="relative mx-auto max-w-4xl px-6 text-center">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative mx-auto max-w-4xl px-6 text-center"
+      >
         <motion.a
           variants={rise}
           href="#features"
@@ -32,25 +42,47 @@ export default function Hero() {
           <span className="gradient-text">Keep the momentum.</span>
         </motion.h1>
 
-        <motion.p variants={rise} className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted">
+        <motion.p
+          variants={rise}
+          className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted"
+        >
           Cadence connects your tools and runs the repetitive workflows your team
           does by hand — approvals, handoffs, reminders, reports. Set the rules
           once; it runs forever.
         </motion.p>
 
-        <motion.div variants={rise} className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <a href="#pricing" className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-violet to-cyan px-7 py-3.5 text-sm font-semibold text-base transition-transform hover:scale-[1.03]">
-            Start free for 14 days <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        <motion.div
+          variants={rise}
+          className="mt-9 flex flex-wrap items-center justify-center gap-4"
+        >
+          <a
+            href="/signup"
+            className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-violet to-cyan px-7 py-3.5 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
+          >
+            Start free for 14 days{' '}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
-          <a href="#features" className="rounded-full border border-line px-7 py-3.5 text-sm font-semibold text-fog transition-colors hover:bg-white/5">
+          <a
+            href="#features"
+            className="rounded-full border border-line px-7 py-3.5 text-sm font-semibold text-fog transition-colors hover:bg-white/5"
+          >
             See how it works
           </a>
         </motion.div>
 
-        <motion.div variants={rise} className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted">
-          <span className="flex items-center gap-1.5"><Check className="h-4 w-4 text-cyan" /> No credit card</span>
-          <span className="flex items-center gap-1.5"><Check className="h-4 w-4 text-cyan" /> 5-minute setup</span>
-          <span className="flex items-center gap-1.5"><Check className="h-4 w-4 text-cyan" /> Cancel anytime</span>
+        <motion.div
+          variants={rise}
+          className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted"
+        >
+          <span className="flex items-center gap-1.5">
+            <Check className="h-4 w-4 text-cyan" /> No credit card
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="h-4 w-4 text-cyan" /> 5-minute setup
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Check className="h-4 w-4 text-cyan" /> Cancel anytime
+          </span>
         </motion.div>
       </motion.div>
 
@@ -83,8 +115,12 @@ export default function Hero() {
                   transition={{ delay: 0.8 + i * 0.18 }}
                   className="flex items-center gap-4 rounded-lg border border-line bg-surface2 px-4 py-3"
                 >
-                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${s.c === 'violet' ? 'bg-violet' : 'bg-cyan'}`} />
-                  <span className="w-16 shrink-0 text-xs uppercase tracking-wider text-muted">{s.t}</span>
+                  <span
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${s.c === 'violet' ? 'bg-violet' : 'bg-cyan'}`}
+                  />
+                  <span className="w-16 shrink-0 text-xs uppercase tracking-wider text-muted">
+                    {s.t}
+                  </span>
                   <span className="text-sm text-fog">{s.d}</span>
                 </motion.div>
               ))}

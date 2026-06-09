@@ -3,12 +3,43 @@
 @tailwind utilities;
 
 :root { color-scheme: dark; }
-html { scroll-behavior: smooth; }
 
 body {
-  @apply bg-base text-fog font-sans antialiased;
+  @apply bg-ink text-fog font-sans antialiased;
   overflow-x: hidden;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+:focus-visible {
+  outline: 2px solid #7c5cff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 100;
+  background: #7c5cff;
+  color: #08080d;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
 
 .label {
   @apply text-xs uppercase tracking-[0.25em] font-semibold;

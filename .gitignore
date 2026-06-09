@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.next/
 .vite/
 .vercel
 .env
@@ -9,3 +10,7 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+next-env.d.ts
+/playwright-report/
+/test-results/
+/.turbo/
