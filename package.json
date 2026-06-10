@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "worker": "tsx --env-file-if-exists=.env worker/index.ts",
+    "stripe:setup": "tsx --env-file-if-exists=.env scripts/stripe-setup.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -35,6 +36,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "resend": "^6.12.4",
+    "stripe": "^22.2.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
