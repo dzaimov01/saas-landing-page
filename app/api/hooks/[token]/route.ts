@@ -2,9 +2,19 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { enqueueRun } from '@/lib/queue'
 import { assertWithinRunQuota, PlanLimitError } from '@/lib/billing'
+import { rateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
+
+  const rl = await rateLimit(`hook:${token}`, { limit: 60, windowSec: 60 })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+    )
+  }
+
   const workflow = await db.workflow.findUnique({
     where: { webhookToken: token },
     include: { nodes: true },

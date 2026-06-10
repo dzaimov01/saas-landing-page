@@ -6,6 +6,7 @@ import { requireUser, getActiveWorkspace } from '@/lib/session'
 import { requireWorkspaceRole, RbacError } from '@/lib/rbac'
 import { billingEnabled, getStripe, createCheckoutSession } from '@/lib/stripe'
 import { getPlan } from '@/lib/plans'
+import { rateLimit } from '@/lib/ratelimit'
 
 const Body = z.object({
   plan: z.enum(['TEAM', 'SCALE']),
@@ -23,6 +24,14 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof RbacError) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     throw e
+  }
+
+  const rl = await rateLimit(`checkout:${user.id}`, { limit: 10, windowSec: 60 })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Please try again shortly.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+    )
   }
 
   const parsed = Body.safeParse(await req.json().catch(() => null))
