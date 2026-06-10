@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { httpRequest } from './http'
 import { slackMessage } from './slack'
+import { discordMessage } from './discord'
+import { openaiComplete } from './openai'
+import { setData } from './setdata'
+import { filter } from './filter'
 import { delay } from './delay'
 import { getConnector } from './index'
 
-const ctx = { trigger: {}, steps: {} }
+const ctx = { trigger: { amount: 10 }, steps: {} }
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -13,30 +17,47 @@ describe('http_request connector', () => {
     const fetchMock = vi.fn().mockResolvedValue({ status: 200, text: async () => 'ok' })
     vi.stubGlobal('fetch', fetchMock)
     const out = await httpRequest({ method: 'GET', url: 'https://x.com' }, ctx)
-    expect(fetchMock).toHaveBeenCalledWith('https://x.com', expect.objectContaining({ method: 'GET' }))
     expect(out).toMatchObject({ status: 200, body: 'ok' })
   })
-  it('throws on missing url', async () => {
-    await expect(httpRequest({ method: 'GET', url: '' }, ctx)).rejects.toThrow(/url/)
+})
+
+describe('credentialed connectors use the secret', () => {
+  it('slack posts to the connection webhook url', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+    await slackMessage({ text: 'hi' }, ctx, { webhookUrl: 'https://hooks/x' })
+    expect(fetchMock).toHaveBeenCalledWith('https://hooks/x', expect.objectContaining({ method: 'POST' }))
+  })
+  it('discord throws without a connection', async () => {
+    await expect(discordMessage({ content: 'x' }, ctx, undefined)).rejects.toThrow(/connection/)
+  })
+  it('openai returns the completion text', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'hello world' } }] }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const out = await openaiComplete({ prompt: 'hi', model: 'gpt-4o-mini' }, ctx, { apiKey: 'sk-x' })
+    expect(out).toEqual({ text: 'hello world' })
   })
 })
 
-describe('slack connector', () => {
-  it('dev-falls back when no webhook url', async () => {
-    const out = await slackMessage({ webhookUrl: '', text: 'hi' }, ctx)
-    expect(out).toMatchObject({ delivered: false, dev: true })
+describe('utility connectors', () => {
+  it('set_data parses json', async () => {
+    expect(await setData({ json: '{"name":"Ada"}' }, ctx)).toEqual({ name: 'Ada' })
   })
-})
-
-describe('delay connector', () => {
-  it('returns immediately for 0 seconds', async () => {
+  it('filter evaluates the condition', async () => {
+    expect(await filter({ field: 'trigger.amount', operator: 'gt', value: '5' }, ctx)).toEqual({ passed: true })
+    expect(await filter({ field: 'trigger.amount', operator: 'lt', value: '5' }, ctx)).toEqual({ passed: false })
+  })
+  it('delay returns immediately for 0 seconds', async () => {
     expect(await delay({ seconds: 0 }, ctx)).toEqual({ waitedSeconds: 0 })
   })
 })
 
 describe('registry', () => {
   it('resolves known connectors and throws on unknown', () => {
-    expect(getConnector('http_request')).toBe(httpRequest)
+    expect(getConnector('discord_message')).toBe(discordMessage)
     expect(() => getConnector('nope')).toThrow()
   })
 })

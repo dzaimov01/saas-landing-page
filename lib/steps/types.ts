@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 
 export type StepKind = 'TRIGGER' | 'ACTION' | 'CONDITION'
-export type FieldType = 'text' | 'textarea' | 'select' | 'number'
+export type FieldType = 'text' | 'textarea' | 'select' | 'number' | 'connection'
 
 export interface FieldDescriptor {
   name: string
@@ -21,4 +21,6 @@ export interface StepType {
   fields: FieldDescriptor[]
   /** Source handle ids (CONDITION → ['true','false']); `target` = accepts an incoming edge. */
   handles: { source: string[]; target: boolean }
+  /** When set, this step uses a stored Connection of this type (decrypted at run time). */
+  connectionType?: string
 }

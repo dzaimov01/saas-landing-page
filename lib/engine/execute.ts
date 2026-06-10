@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 import { db } from '../db'
 import { getStepType } from '../steps/registry'
 import { getConnector } from '../connectors'
+import { getDecryptedSecret } from '../connections'
 import { resolveConfig, type RunContext } from '../template'
 import { evaluate, type ConditionConfig } from './condition'
 import { nextNodeId } from './plan'
@@ -67,8 +68,15 @@ export async function executeRun(runId: string): Promise<void> {
         branch = result ? 'true' : 'false'
         output = { result }
       } else {
+        const stepType = getStepType(node.type)
         const resolved = resolveConfig(config, ctx)
-        output = await getConnector(node.type)(resolved, ctx)
+        let secret: Record<string, string> | undefined
+        if (stepType.connectionType) {
+          const found = await getDecryptedSecret(String(config.connectionId ?? ''), run.workspaceId)
+          if (!found) throw new Error(`No connection selected for "${stepType.label}"`)
+          secret = found
+        }
+        output = await getConnector(node.type)(resolved, ctx, secret)
         ;(ctx.steps as Record<string, unknown>)[node.id] = output
       }
 
@@ -81,6 +89,12 @@ export async function executeRun(runId: string): Promise<void> {
         },
       })
       currentStepRunId = null
+
+      // A Filter step that does not pass stops the run (successfully).
+      if (node.type === 'filter' && (output as { passed?: boolean })?.passed === false) {
+        break
+      }
+
       currentId = nextNodeId(node.id, workflow.edges, branch)
     }
 
