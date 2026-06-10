@@ -9,13 +9,15 @@ const schema = z.object({
   EMAIL_FROM: z.string().default('Cadence <onboarding@resend.dev>'),
   APP_URL: z.string().url().default('http://localhost:3000'),
   REDIS_URL: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_TEAM_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_TEAM_ANNUAL: z.string().optional(),
+  STRIPE_PRICE_SCALE_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_SCALE_ANNUAL: z.string().optional(),
 })
 
-/**
- * Validated, typed environment. Throws at import time if required vars are missing,
- * so misconfiguration fails fast rather than at the first request.
- */
-export const env = schema.parse({
+const raw = {
   DATABASE_URL: process.env.DATABASE_URL,
   AUTH_SECRET: process.env.AUTH_SECRET,
   AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
@@ -24,4 +26,25 @@ export const env = schema.parse({
   EMAIL_FROM: process.env.EMAIL_FROM,
   APP_URL: process.env.APP_URL,
   REDIS_URL: process.env.REDIS_URL,
-})
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  STRIPE_PRICE_TEAM_MONTHLY: process.env.STRIPE_PRICE_TEAM_MONTHLY,
+  STRIPE_PRICE_TEAM_ANNUAL: process.env.STRIPE_PRICE_TEAM_ANNUAL,
+  STRIPE_PRICE_SCALE_MONTHLY: process.env.STRIPE_PRICE_SCALE_MONTHLY,
+  STRIPE_PRICE_SCALE_ANNUAL: process.env.STRIPE_PRICE_SCALE_ANNUAL,
+}
+
+/**
+ * Validated, typed environment. At runtime this throws if required vars are missing,
+ * so misconfiguration fails fast. During `next build` (no secrets available on the
+ * build machine) validation is skipped so the app can be built before env is set.
+ */
+const isBuild = process.env.NEXT_PHASE === 'phase-production-build'
+
+export const env = isBuild
+  ? ({
+      ...raw,
+      EMAIL_FROM: raw.EMAIL_FROM ?? 'Cadence <onboarding@resend.dev>',
+      APP_URL: raw.APP_URL ?? 'http://localhost:3000',
+    } as z.infer<typeof schema>)
+  : schema.parse(raw)
