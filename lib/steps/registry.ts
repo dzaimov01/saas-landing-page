@@ -87,14 +87,19 @@ export const STEP_TYPES: Record<string, StepType> = {
     key: 'slack_message',
     label: 'Slack message',
     kind: 'ACTION',
-    description: 'Post a message to a Slack channel.',
+    description: 'Post a message via a Slack incoming webhook.',
     configSchema: z.object({
-      channel: z.string().min(1),
+      webhookUrl: z.string().url(),
       text: z.string().min(1),
     }),
-    defaultConfig: { channel: '', text: '' },
+    defaultConfig: { webhookUrl: '', text: '' },
     fields: [
-      { name: 'channel', label: 'Channel', type: 'text', placeholder: '#general' },
+      {
+        name: 'webhookUrl',
+        label: 'Slack webhook URL',
+        type: 'text',
+        placeholder: 'https://hooks.slack.com/services/...',
+      },
       { name: 'text', label: 'Message', type: 'textarea' },
     ],
     handles: { source: ['out'], target: true },
