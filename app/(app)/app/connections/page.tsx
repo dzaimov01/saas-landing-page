@@ -1,13 +1,21 @@
-import { EmptyState } from '@/components/app/EmptyState'
+import { redirect } from 'next/navigation'
+import { requireUser, getActiveWorkspace } from '@/lib/session'
+import { listConnections } from '@/lib/connections'
+import { listConnectionTypes } from '@/lib/connections/registry'
+import { encryptionEnabled } from '@/lib/crypto'
+import { ConnectionsClient } from './ConnectionsClient'
 
-export default function ConnectionsPage() {
+export default async function ConnectionsPage() {
+  const user = await requireUser()
+  const active = await getActiveWorkspace(user.id)
+  if (!active) redirect('/login')
+  const connections = await listConnections(active.workspace.id)
+
   return (
-    <div>
-      <h1 className="mb-6 font-display text-2xl font-bold">Connections</h1>
-      <EmptyState
-        title="No connections yet"
-        body="Connect Slack, email, and HTTP endpoints in an upcoming release."
-      />
-    </div>
+    <ConnectionsClient
+      enabled={encryptionEnabled()}
+      types={listConnectionTypes().map((t) => ({ type: t.type, label: t.label, fields: t.fields }))}
+      connections={connections.map((c) => ({ id: c.id, type: c.type, name: c.name }))}
+    />
   )
 }
