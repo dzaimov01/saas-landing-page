@@ -18,6 +18,7 @@ const schema = z.object({
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
+  ENCRYPTION_KEY: z.string().optional(),
 })
 
 const raw = {
@@ -38,6 +39,7 @@ const raw = {
   SENTRY_DSN: process.env.SENTRY_DSN,
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
 }
 
 /**
