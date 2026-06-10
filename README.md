@@ -117,6 +117,8 @@ See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Execution engine:
 
 ## Deploying (going live)
 
+> Full step-by-step checklist: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 The app is built to deploy on Vercel + a managed Postgres (Neon). To go live you
 supply the accounts only you can own:
 
