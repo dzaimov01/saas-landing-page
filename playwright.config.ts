@@ -5,11 +5,18 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  use: { baseURL: 'http://localhost:3000', trace: 'on-first-retry' },
+  globalSetup: './e2e/global-setup.ts',
+  use: { baseURL: 'http://localhost:3100', trace: 'on-first-retry' },
   webServer: {
-    command: 'npm run build && npm run start',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    command: 'npm run build && npx next start -p 3100',
+    url: 'http://localhost:3100',
+    reuseExistingServer: false,
     timeout: 180_000,
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/cadence?schema=public',
+      REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6380',
+      AUTH_SECRET: process.env.AUTH_SECRET ?? 'dev-secret-dev-secret-dev-secret-123',
+      APP_URL: 'http://localhost:3100',
+    },
   },
 })
