@@ -30,7 +30,7 @@ export default function Hero() {
           href="#features"
           className="glass mx-auto mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-muted"
         >
-          <Zap className="h-3.5 w-3.5 text-cyan" /> New — AI-suggested automations
+          <Zap className="h-3.5 w-3.5 text-cyan" /> New — visual workflow builder
           <ArrowRight className="h-3.5 w-3.5" />
         </motion.a>
 
