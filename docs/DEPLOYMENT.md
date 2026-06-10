@@ -12,6 +12,7 @@ execution worker runs on a separate always-on host.
 - [ ] `DATABASE_URL` — Postgres connection string.
 - [ ] `REDIS_URL` — Redis URL.
 - [ ] `AUTH_SECRET` — generate with `npx auth secret`.
+- [ ] `ENCRYPTION_KEY` — `openssl rand -base64 32` (encrypts stored Connection secrets).
 - [ ] `APP_URL` — the production URL.
 - [ ] `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` — (optional) Google OAuth; register the
       callback `https://<APP_URL>/api/auth/callback/google`.

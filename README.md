@@ -34,6 +34,13 @@ Vitest + Playwright · deployed on Vercel.
   plan-limit enforcement (workflow count + monthly run quota) and a usage dashboard
   at `/app/settings/billing`. Without Stripe keys, everyone stays on the free
   Starter plan and the app still works.
+- **Connections** — reusable, **encrypted** (AES-256-GCM) credentials at
+  `/app/connections` for Slack, Discord, Telegram, Airtable, Notion, and OpenAI;
+  workflow steps reference a connection instead of pasting keys.
+- **Connectors** — HTTP request, email, Slack, Discord, Telegram, Airtable, Notion,
+  OpenAI (AI completion), plus utility Set-data, Filter, Delay, and Condition steps.
+- **Templates** — a `/app/templates` gallery of ready-to-go workflows; "Use template"
+  clones one into your workspace to configure.
 
 ## Prerequisites
 
@@ -98,9 +105,10 @@ npm run stripe:setup     # creates products/prices, prints the 4 STRIPE_PRICE_* 
 ## Environment variables
 
 See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Execution engine:
-`REDIS_URL`. Billing: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, four
-`STRIPE_PRICE_*`. Optional: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`,
-`RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`.
+`REDIS_URL`. Connections: `ENCRYPTION_KEY` (`openssl rand -base64 32`). Billing:
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, four `STRIPE_PRICE_*`. Optional:
+`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`,
+`SENTRY_DSN`.
 
 ## Scripts
 
@@ -150,8 +158,9 @@ migration, build, and E2E (with Postgres + Redis services) on every push/PR.
 
 See `docs/superpowers/specs/` and `docs/superpowers/plans/` for the phased plan.
 ✅ Phase 1: workflow builder · ✅ Phase 2: execution engine + connectors ·
-✅ Phase 3: Stripe billing + plan enforcement · Phase 4: productionization
-(security, monitoring, legal).
+✅ Phase 3: Stripe billing + plan enforcement · ✅ Phase 4: productionization
+(security, monitoring, legal) · ✅ Phase 5: encrypted Connections, more
+integrations, and a template library.
 
 ---
 
