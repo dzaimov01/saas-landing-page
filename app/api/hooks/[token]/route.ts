@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { enqueueRun } from '@/lib/queue'
+import { assertWithinRunQuota, PlanLimitError } from '@/lib/billing'
 
 export async function POST(req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
@@ -13,6 +14,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
   }
   if (!workflow.nodes.some((n) => n.type === 'webhook')) {
     return NextResponse.json({ error: 'Workflow has no webhook trigger' }, { status: 404 })
+  }
+
+  try {
+    await assertWithinRunQuota(workflow.workspaceId)
+  } catch (e) {
+    if (e instanceof PlanLimitError) {
+      return NextResponse.json({ error: e.message, code: e.code }, { status: 402 })
+    }
+    throw e
   }
 
   const body = await req.json().catch(() => ({}))

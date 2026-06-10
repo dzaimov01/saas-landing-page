@@ -3,6 +3,7 @@ import { env } from '../lib/env'
 import { connectionOptions, type RunJob } from '../lib/queue'
 import { executeRun } from '../lib/engine/execute'
 import { db } from '../lib/db'
+import { assertWithinRunQuota, PlanLimitError } from '../lib/billing'
 
 if (!env.REDIS_URL) {
   console.error('[worker] REDIS_URL is not set — cannot start.')
@@ -20,6 +21,15 @@ const worker = new Worker<RunJob>(
     // Scheduled trigger fired — create a run, then execute it.
     const wf = await db.workflow.findUnique({ where: { id: data.workflowId } })
     if (!wf || wf.status !== 'ENABLED') return
+    try {
+      await assertWithinRunQuota(wf.workspaceId)
+    } catch (e) {
+      if (e instanceof PlanLimitError) {
+        console.warn(`[worker] schedule skipped for ${wf.id}: ${e.message}`)
+        return
+      }
+      throw e
+    }
     const run = await db.workflowRun.create({
       data: {
         workflowId: wf.id,
