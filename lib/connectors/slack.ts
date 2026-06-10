@@ -1,11 +1,12 @@
 import type { Connector } from './types'
+import { logger } from '../logger'
 
 export const slackMessage: Connector = async (config) => {
   const webhookUrl = String(config.webhookUrl ?? '')
   const text = String(config.text ?? '')
   if (!webhookUrl) {
     // Dev fallback: no webhook configured — log instead of failing.
-    console.info(`[slack:dev] ${text}`)
+    logger.info('slack (dev fallback)', { text })
     return { delivered: false, dev: true }
   }
   const res = await fetch(webhookUrl, {

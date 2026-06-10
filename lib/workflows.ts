@@ -3,6 +3,7 @@ import { db } from './db'
 import { validateWorkflow } from './steps/validate'
 import { generateToken } from './tokens'
 import { env } from './env'
+import { logger } from './logger'
 
 export class WorkflowValidationError extends Error {
   errors: string[]
@@ -121,7 +122,10 @@ export async function saveWorkflow({
         await removeSchedule(id)
       }
     } catch (e) {
-      console.warn('[schedule] registration skipped:', e instanceof Error ? e.message : e)
+      logger.warn('schedule registration skipped', {
+        workflowId: id,
+        reason: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 }
