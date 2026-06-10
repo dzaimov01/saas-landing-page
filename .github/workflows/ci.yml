@@ -11,6 +11,8 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cadence
       REDIS_URL: redis://localhost:6379
       AUTH_SECRET: ci-secret-ci-secret-ci-secret
+      ENCRYPTION_KEY: Lm5hFbtQl55RMPubYIcCcLN666+h5tL8KahFRr1KYVU=
+      DISABLE_RATE_LIMIT: '1'
       APP_URL: http://localhost:3100
     services:
       postgres:
