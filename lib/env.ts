@@ -15,6 +15,9 @@ const schema = z.object({
   STRIPE_PRICE_TEAM_ANNUAL: z.string().optional(),
   STRIPE_PRICE_SCALE_MONTHLY: z.string().optional(),
   STRIPE_PRICE_SCALE_ANNUAL: z.string().optional(),
+  SENTRY_DSN: z.string().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().optional(),
 })
 
 const raw = {
@@ -32,6 +35,9 @@ const raw = {
   STRIPE_PRICE_TEAM_ANNUAL: process.env.STRIPE_PRICE_TEAM_ANNUAL,
   STRIPE_PRICE_SCALE_MONTHLY: process.env.STRIPE_PRICE_SCALE_MONTHLY,
   STRIPE_PRICE_SCALE_ANNUAL: process.env.STRIPE_PRICE_SCALE_ANNUAL,
+  SENTRY_DSN: process.env.SENTRY_DSN,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
 }
 
 /**

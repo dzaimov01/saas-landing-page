@@ -4,6 +4,7 @@ import { connectionOptions, type RunJob } from '../lib/queue'
 import { executeRun } from '../lib/engine/execute'
 import { db } from '../lib/db'
 import { assertWithinRunQuota, PlanLimitError } from '../lib/billing'
+import { logger } from '../lib/logger'
 
 if (!env.REDIS_URL) {
   console.error('[worker] REDIS_URL is not set — cannot start.')
@@ -25,7 +26,7 @@ const worker = new Worker<RunJob>(
       await assertWithinRunQuota(wf.workspaceId)
     } catch (e) {
       if (e instanceof PlanLimitError) {
-        console.warn(`[worker] schedule skipped for ${wf.id}: ${e.message}`)
+        logger.warn('worker: schedule skipped (plan limit)', { workflowId: wf.id, reason: e.message })
         return
       }
       throw e
@@ -43,10 +44,12 @@ const worker = new Worker<RunJob>(
   { connection: connectionOptions(), concurrency: 5 },
 )
 
-worker.on('completed', (job) => console.log('[worker] completed', job.id))
-worker.on('failed', (job, err) => console.error('[worker] failed', job?.id, err?.message))
+worker.on('completed', (job) => logger.info('worker: job completed', { jobId: job.id }))
+worker.on('failed', (job, err) =>
+  logger.error('worker: job failed', { jobId: job?.id, error: err?.message }),
+)
 
-console.log('[worker] listening on "runs" queue')
+logger.info('worker: listening on "runs" queue')
 
 async function shutdown() {
   await worker.close()

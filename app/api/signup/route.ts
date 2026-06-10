@@ -6,6 +6,14 @@ import { createPersonalWorkspace } from '@/lib/workspace'
 import { generateToken, expiryFromNow } from '@/lib/tokens'
 import { sendEmail, actionLinkEmail } from '@/lib/email'
 import { env } from '@/lib/env'
+import { rateLimit, clientIp } from '@/lib/ratelimit'
+
+function tooMany(retryAfter: number) {
+  return NextResponse.json(
+    { error: 'Too many attempts. Please try again later.' },
+    { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+  )
+}
 
 const Body = z.object({
   name: z.string().min(1).max(80),
@@ -14,6 +22,9 @@ const Body = z.object({
 })
 
 export async function POST(req: Request) {
+  const rl = await rateLimit(`signup:${clientIp(req)}`, { limit: 5, windowSec: 600 })
+  if (!rl.ok) return tooMany(rl.retryAfter)
+
   const parsed = Body.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   const { name, email: rawEmail, password } = parsed.data

@@ -1,7 +1,29 @@
+import Link from 'next/link'
+
 const cols = [
-  { h: 'Product', links: ['Features', 'Integrations', 'Pricing', 'Changelog'] },
-  { h: 'Company', links: ['About', 'Careers', 'Blog', 'Contact'] },
-  { h: 'Resources', links: ['Docs', 'API', 'Status', 'Security'] },
+  {
+    h: 'Product',
+    links: [
+      { label: 'Features', href: '/#features' },
+      { label: 'Pricing', href: '/#pricing' },
+      { label: 'Sign in', href: '/login' },
+    ],
+  },
+  {
+    h: 'Company',
+    links: [
+      { label: 'About', href: '#' },
+      { label: 'Blog', href: '#' },
+      { label: 'Contact', href: '#' },
+    ],
+  },
+  {
+    h: 'Legal',
+    links: [
+      { label: 'Terms', href: '/terms' },
+      { label: 'Privacy', href: '/privacy' },
+    ],
+  },
 ]
 
 export default function Footer() {
@@ -25,10 +47,16 @@ export default function Footer() {
               <p className="mb-3 text-sm font-semibold text-fog">{c.h}</p>
               <ul className="space-y-2 text-sm text-muted">
                 {c.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="transition-colors hover:text-fog">
-                      {l}
-                    </a>
+                  <li key={l.label}>
+                    {l.href.startsWith('/') ? (
+                      <Link href={l.href} className="transition-colors hover:text-fog">
+                        {l.label}
+                      </Link>
+                    ) : (
+                      <a href={l.href} className="transition-colors hover:text-fog">
+                        {l.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

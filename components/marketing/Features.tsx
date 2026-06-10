@@ -40,22 +40,23 @@ export default function Features() {
                 approvals, and watch runs execute in real time — no code.
               </p>
               <div className="mt-8 grid grid-cols-3 gap-4 border-t border-line pt-6">
-                <Stat value={<Counter to={12} suffix="h" />} label="saved / week / team" />
-                <Stat value={<Counter to={99.9} decimals={1} suffix="%" />} label="run reliability" />
-                <Stat value={<Counter to={300} suffix="+" />} label="integrations" />
+                <Stat value={<Counter to={12} suffix="h" />} label="hours saved / week*" />
+                <Stat value={<Counter to={99.9} decimals={1} suffix="%" />} label="uptime target" />
+                <Stat value={<Counter to={6} suffix="+" />} label="connectors &amp; APIs" />
               </div>
+              <p className="mt-3 text-[11px] text-muted">*Illustrative; varies by team and workflows.</p>
             </div>
           </motion.div>
 
           <Card
             icon={Plug}
-            title="300+ integrations"
-            desc="Slack, Notion, HubSpot, Stripe, Sheets — connect in a click."
+            title="Connect your stack"
+            desc="HTTP requests, email, and Slack today — a growing connector library."
           />
           <Card
             icon={ShieldCheck}
             title="Secure by design"
-            desc="Encryption at rest, granular roles, full audit logs."
+            desc="Encrypted connections, workspace roles, and full run history."
           />
           <Card
             icon={GitBranch}
