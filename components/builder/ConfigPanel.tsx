@@ -8,11 +8,13 @@ import type { CadenceNodeData } from './nodes'
 export function ConfigPanel({
   node,
   canEdit,
+  webhookUrl,
   onChange,
   onClose,
 }: {
   node: { id: string; data: CadenceNodeData }
   canEdit: boolean
+  webhookUrl?: string | null
   onChange: (id: string, patch: Partial<CadenceNodeData>) => void
   onClose: () => void
 }) {
@@ -35,6 +37,12 @@ export function ConfigPanel({
       </div>
 
       <div className="space-y-4">
+        {node.data.stepType === 'webhook' && webhookUrl && (
+          <div className="rounded-lg border border-line bg-surface p-3">
+            <p className="mb-1 text-xs font-semibold text-muted">Webhook URL (POST to trigger)</p>
+            <code className="block break-all text-xs text-cyan">{webhookUrl}</code>
+          </div>
+        )}
         <div>
           <Label htmlFor="node-name">Step name</Label>
           <Input
