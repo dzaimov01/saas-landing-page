@@ -24,11 +24,18 @@ Vitest + Playwright · deployed on Vercel.
   MEMBER roles, change roles, and remove members (RBAC-enforced).
 - Authenticated app shell at `/app` with workspace switcher and settings
   (profile, workspace, members; billing is a placeholder until Phase 3).
+- **Visual workflow builder** (`/app/workflows/[id]`) — React Flow canvas with
+  trigger/action/condition nodes, branching, schema-driven config, and validation.
+- **Execution engine** — webhook + schedule triggers enqueue runs onto a BullMQ
+  queue; a worker executes the graph through real connectors (HTTP, email, Slack,
+  delay) with `{{...}}` templating and branching conditions; results appear in the
+  run monitor (`/app/runs`).
 
 ## Prerequisites
 
 - **Node 22** (`.nvmrc` provided — run `nvm use`).
 - **PostgreSQL** — a local instance, a Docker container, or a Neon database.
+- **Redis** — for the execution engine (BullMQ). Local Docker or Upstash in prod.
 
 ## Local development
 
@@ -50,6 +57,20 @@ docker run -d --name cadence-pg -e POSTGRES_PASSWORD=postgres \
 # DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cadence?schema=public"
 ```
 
+### Running the execution engine
+
+Workflows execute on a BullMQ worker backed by Redis. Start Redis, set
+`REDIS_URL`, then run the worker alongside the app:
+
+```bash
+docker run -d --name cadence-redis -p 6379:6379 redis:7-alpine
+# REDIS_URL="redis://localhost:6379"
+npm run worker          # separate terminal — processes the "runs" queue
+```
+
+With the worker running, "Run now", webhook posts (`/api/hooks/<token>`), and
+schedule triggers all execute and stream into the run monitor (`/app/runs`).
+
 ### Email & Google (optional locally)
 
 - **Email:** when `RESEND_API_KEY` is unset, verification / reset / invite links
@@ -60,8 +81,9 @@ docker run -d --name cadence-pg -e POSTGRES_PASSWORD=postgres \
 
 ## Environment variables
 
-See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Optional:
-`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`.
+See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. For the execution
+engine: `REDIS_URL`. Optional: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`,
+`RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`.
 
 ## Scripts
 
@@ -73,6 +95,7 @@ See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Optional:
 | `npm run lint` | ESLint (next core-web-vitals + jsx-a11y) |
 | `npm test` | Vitest unit tests |
 | `npm run e2e` | Playwright end-to-end tests |
+| `npm run worker` | BullMQ worker that executes workflow runs |
 | `npm run db:migrate` / `npm run db:deploy` | Prisma migrations (dev / prod) |
 
 ## Deploying (going live)
@@ -87,14 +110,18 @@ supply the accounts only you can own:
 4. (Optional) `RESEND_API_KEY` + a verified `EMAIL_FROM` to send real email.
 5. Set `APP_URL` to the production URL.
 6. Run `npm run db:deploy` against the production database (CI does this too).
+7. **Execution engine:** provision a managed Redis (Upstash; `rediss://...`) and
+   set `REDIS_URL`. The Next.js app deploys on Vercel, but the BullMQ **worker is
+   a long-running process Vercel cannot host** — run `npm run worker` on an
+   always-on host (Railway/Render/Fly/a VM) pointed at the same Postgres + Redis.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, a Prisma
-migration, build, and E2E on every push/PR.
+migration, build, and E2E (with Postgres + Redis services) on every push/PR.
 
 ## Roadmap
 
 See `docs/superpowers/specs/` and `docs/superpowers/plans/` for the phased plan.
-Phase 1: workflow builder · Phase 2: execution engine + connectors ·
+✅ Phase 1: workflow builder · ✅ Phase 2: execution engine + connectors ·
 Phase 3: Stripe billing · Phase 4: productionization (security, monitoring, legal).
 
 ---
