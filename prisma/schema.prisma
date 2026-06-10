@@ -34,6 +34,12 @@ enum StepStatus {
   SKIPPED
 }
 
+enum PlanKey {
+  STARTER
+  TEAM
+  SCALE
+}
+
 model User {
   id            String               @id @default(cuid())
   name          String?
@@ -88,9 +94,23 @@ model Workspace {
   name        String
   slug        String       @unique
   createdAt   DateTime     @default(now())
-  memberships Membership[]
-  invitations Invitation[]
-  workflows   Workflow[]
+  memberships  Membership[]
+  invitations  Invitation[]
+  workflows    Workflow[]
+  subscription Subscription?
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  workspaceId          String    @unique
+  plan                 PlanKey   @default(STARTER)
+  status               String    @default("active")
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  updatedAt            DateTime  @updatedAt
+  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
 
 model Workflow {

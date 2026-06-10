@@ -30,6 +30,10 @@ Vitest + Playwright · deployed on Vercel.
   queue; a worker executes the graph through real connectors (HTTP, email, Slack,
   delay) with `{{...}}` templating and branching conditions; results appear in the
   run monitor (`/app/runs`).
+- **Billing** — Stripe Checkout + Customer Portal for the three tiers, with hard
+  plan-limit enforcement (workflow count + monthly run quota) and a usage dashboard
+  at `/app/settings/billing`. Without Stripe keys, everyone stays on the free
+  Starter plan and the app still works.
 
 ## Prerequisites
 
@@ -79,10 +83,23 @@ schedule triggers all execute and stream into the run monitor (`/app/runs`).
 - **Google sign-in:** set `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` from a Google
   OAuth client. Without them, email/password still works.
 
+### Billing (optional locally)
+
+Without Stripe keys, every workspace is on the free **Starter** plan and the app
+works fully. To enable upgrades:
+
+```bash
+# set STRIPE_SECRET_KEY (test mode) in .env, then:
+npm run stripe:setup     # creates products/prices, prints the 4 STRIPE_PRICE_* IDs
+# add those + STRIPE_WEBHOOK_SECRET to .env
+# locally, forward webhooks: stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+
 ## Environment variables
 
-See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. For the execution
-engine: `REDIS_URL`. Optional: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`,
+See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Execution engine:
+`REDIS_URL`. Billing: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, four
+`STRIPE_PRICE_*`. Optional: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`,
 `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`.
 
 ## Scripts
@@ -114,6 +131,15 @@ supply the accounts only you can own:
    set `REDIS_URL`. The Next.js app deploys on Vercel, but the BullMQ **worker is
    a long-running process Vercel cannot host** — run `npm run worker` on an
    always-on host (Railway/Render/Fly/a VM) pointed at the same Postgres + Redis.
+8. **Billing:** set `STRIPE_SECRET_KEY`, run `npm run stripe:setup`, add the four
+   `STRIPE_PRICE_*`, and create a Stripe webhook to `/api/stripe/webhook` →
+   set `STRIPE_WEBHOOK_SECRET`.
+
+> **Build note:** the Vercel build runs `prisma generate && next build` (no
+> `migrate deploy` — migrations run via `npm run db:deploy` / CI), and env
+> validation is skipped during the build so the app builds before secrets are set.
+> Set the env vars above in the Vercel project, then run `npm run db:deploy` once
+> against the production database.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, a Prisma
 migration, build, and E2E (with Postgres + Redis services) on every push/PR.
@@ -122,7 +148,8 @@ migration, build, and E2E (with Postgres + Redis services) on every push/PR.
 
 See `docs/superpowers/specs/` and `docs/superpowers/plans/` for the phased plan.
 ✅ Phase 1: workflow builder · ✅ Phase 2: execution engine + connectors ·
-Phase 3: Stripe billing · Phase 4: productionization (security, monitoring, legal).
+✅ Phase 3: Stripe billing + plan enforcement · Phase 4: productionization
+(security, monitoring, legal).
 
 ---
 

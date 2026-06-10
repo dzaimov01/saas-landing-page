@@ -4,6 +4,7 @@ import { requireUser, getActiveWorkspace } from '@/lib/session'
 import { requireWorkspaceRole, RbacError } from '@/lib/rbac'
 import { getWorkflow } from '@/lib/workflows'
 import { enqueueRun } from '@/lib/queue'
+import { assertWithinRunQuota, PlanLimitError } from '@/lib/billing'
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,6 +19,15 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   }
   const workflow = await getWorkflow(id, active.workspace.id)
   if (!workflow) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  try {
+    await assertWithinRunQuota(active.workspace.id)
+  } catch (e) {
+    if (e instanceof PlanLimitError) {
+      return NextResponse.json({ error: e.message, code: e.code }, { status: 402 })
+    }
+    throw e
+  }
 
   const run = await db.workflowRun.create({
     data: {

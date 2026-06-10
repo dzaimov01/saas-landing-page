@@ -17,16 +17,22 @@ const badge: Record<Item['status'], string> = {
 export function WorkflowList({ workflows, canDelete }: { workflows: Item[]; canDelete: boolean }) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
+  const [error, setError] = useState('')
 
   async function create() {
     setCreating(true)
+    setError('')
     const res = await fetch('/api/workflows', { method: 'POST' })
     if (res.ok) {
       const { id } = await res.json()
       router.push(`/app/workflows/${id}`)
-    } else {
-      setCreating(false)
+      return
     }
+    if (res.status === 402) {
+      const j = await res.json().catch(() => ({}))
+      setError(j.error ?? 'Plan limit reached.')
+    }
+    setCreating(false)
   }
 
   async function remove(id: string) {
@@ -42,6 +48,15 @@ export function WorkflowList({ workflows, canDelete }: { workflows: Item[]; canD
           {creating ? 'Creating…' : 'New workflow'}
         </Button>
       </div>
+
+      {error && (
+        <p role="alert" className="mb-4 rounded-lg border border-amber-400/40 bg-amber-400/10 p-3 text-sm text-amber-200">
+          {error}{' '}
+          <Link href="/app/settings/billing" className="underline">
+            Upgrade your plan
+          </Link>
+        </p>
+      )}
 
       {workflows.length === 0 ? (
         <div className="rounded-2xl border border-line p-12 text-center">
