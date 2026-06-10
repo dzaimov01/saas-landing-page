@@ -8,6 +8,7 @@ const schema = z.object({
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('Cadence <onboarding@resend.dev>'),
   APP_URL: z.string().url().default('http://localhost:3000'),
+  REDIS_URL: z.string().optional(),
 })
 
 /**
@@ -22,4 +23,5 @@ export const env = schema.parse({
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   EMAIL_FROM: process.env.EMAIL_FROM,
   APP_URL: process.env.APP_URL,
+  REDIS_URL: process.env.REDIS_URL,
 })

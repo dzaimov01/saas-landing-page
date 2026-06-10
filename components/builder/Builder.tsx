@@ -27,11 +27,13 @@ export interface BuilderProps {
   workflow: { id: string; name: string; status: Status }
   initialNodes: Node[]
   initialEdges: Edge[]
+  webhookUrl: string | null
   canEdit: boolean
 }
 
-export function Builder({ workflow, initialNodes, initialEdges, canEdit }: BuilderProps) {
+export function Builder({ workflow, initialNodes, initialEdges, webhookUrl, canEdit }: BuilderProps) {
   const router = useRouter()
+  const [running, setRunning] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [name, setName] = useState(workflow.name)
@@ -129,6 +131,21 @@ export function Builder({ workflow, initialNodes, initialEdges, canEdit }: Build
     } else setErrors(['Could not save. Please try again.'])
   }
 
+  async function runNow() {
+    setRunning(true)
+    setErrors([])
+    const res = await fetch(`/api/workflows/${workflow.id}/run`, { method: 'POST' })
+    setRunning(false)
+    if (res.status === 202) {
+      const { runId } = await res.json()
+      router.push(`/app/runs/${runId}`)
+    } else if (res.status === 503) {
+      setErrors(['Execution engine is unavailable (Redis/worker not running).'])
+    } else {
+      setErrors(['Could not start a run.'])
+    }
+  }
+
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col">
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -164,6 +181,9 @@ export function Builder({ workflow, initialNodes, initialEdges, canEdit }: Build
             {saving ? 'Saving…' : 'Save'}
           </Button>
         )}
+        <Button variant="ghost" onClick={runNow} disabled={running}>
+          {running ? 'Starting…' : 'Run now'}
+        </Button>
         {saved && <span className="text-sm text-cyan">Saved</span>}
       </div>
 
@@ -224,6 +244,7 @@ export function Builder({ workflow, initialNodes, initialEdges, canEdit }: Build
           <ConfigPanel
             node={{ id: selectedNode.id, data: selectedNode.data as CadenceNodeData }}
             canEdit={canEdit}
+            webhookUrl={webhookUrl}
             onChange={updateNode}
             onClose={() => setSelectedId(null)}
           />

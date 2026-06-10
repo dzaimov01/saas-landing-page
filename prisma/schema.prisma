@@ -19,6 +19,21 @@ enum WorkflowStatus {
   DISABLED
 }
 
+enum RunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
 model User {
   id            String               @id @default(cuid())
   name          String?
@@ -79,18 +94,53 @@ model Workspace {
 }
 
 model Workflow {
-  id          String         @id @default(cuid())
-  workspaceId String
-  name        String
-  status      WorkflowStatus @default(DRAFT)
-  createdById String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  nodes       WorkflowNode[]
-  edges       WorkflowEdge[]
+  id           String         @id @default(cuid())
+  workspaceId  String
+  name         String
+  status       WorkflowStatus @default(DRAFT)
+  webhookToken String?        @unique
+  createdById  String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  nodes        WorkflowNode[]
+  edges        WorkflowEdge[]
+  runs         WorkflowRun[]
 
   @@index([workspaceId])
+}
+
+model WorkflowRun {
+  id          String      @id @default(cuid())
+  workflowId  String
+  workspaceId String
+  status      RunStatus   @default(QUEUED)
+  trigger     Json
+  error       String?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  workflow    Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  steps       StepRun[]
+
+  @@index([workspaceId])
+  @@index([workflowId])
+}
+
+model StepRun {
+  id         String      @id @default(cuid())
+  runId      String
+  nodeId     String
+  type       String
+  status     StepStatus  @default(PENDING)
+  input      Json?
+  output     Json?
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  run        WorkflowRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
 }
 
 model WorkflowNode {

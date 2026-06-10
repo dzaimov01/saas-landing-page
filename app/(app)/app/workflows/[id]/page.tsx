@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import type { Node, Edge } from '@xyflow/react'
 import { requireUser, getActiveWorkspace } from '@/lib/session'
 import { getWorkflow } from '@/lib/workflows'
+import { env } from '@/lib/env'
 import { Builder } from '@/components/builder/Builder'
 
 export default async function BuilderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,11 +30,14 @@ export default async function BuilderPage({ params }: { params: Promise<{ id: st
     sourceHandle: e.sourceHandle,
   }))
 
+  const webhookUrl = wf.webhookToken ? `${env.APP_URL}/api/hooks/${wf.webhookToken}` : null
+
   return (
     <Builder
       workflow={{ id: wf.id, name: wf.name, status: wf.status }}
       initialNodes={initialNodes}
       initialEdges={initialEdges}
+      webhookUrl={webhookUrl}
       canEdit={true}
     />
   )

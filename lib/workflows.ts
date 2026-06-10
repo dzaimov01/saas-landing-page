@@ -1,6 +1,8 @@
 import type { Prisma, WorkflowStatus } from '@prisma/client'
 import { db } from './db'
 import { validateWorkflow } from './steps/validate'
+import { generateToken } from './tokens'
+import { env } from './env'
 
 export class WorkflowValidationError extends Error {
   errors: string[]
@@ -50,7 +52,7 @@ export function createWorkflow({
   name: string
 }) {
   return db.workflow.create({
-    data: { workspaceId, createdById: userId, name, status: 'DRAFT' },
+    data: { workspaceId, createdById: userId, name, status: 'DRAFT', webhookToken: generateToken(16) },
   })
 }
 
@@ -106,4 +108,20 @@ export async function saveWorkflow({
     }),
     db.workflow.updateMany({ where: { id, workspaceId }, data: { name, status } }),
   ])
+
+  // Register/clear the schedule for scheduled triggers (best-effort; needs Redis).
+  if (env.REDIS_URL) {
+    const scheduleNode = nodes.find((n) => n.type === 'schedule')
+    try {
+      if (status === 'ENABLED' && scheduleNode) {
+        const { upsertSchedule } = await import('./queue')
+        await upsertSchedule(id, scheduleNode.config as { mode: 'interval' | 'cron'; value: string })
+      } else {
+        const { removeSchedule } = await import('./queue')
+        await removeSchedule(id)
+      }
+    } catch (e) {
+      console.warn('[schedule] registration skipped:', e instanceof Error ? e.message : e)
+    }
+  }
 }
