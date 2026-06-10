@@ -16,6 +16,8 @@ export default defineConfig({
       DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/cadence?schema=public',
       REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6380',
       AUTH_SECRET: process.env.AUTH_SECRET ?? 'dev-secret-dev-secret-dev-secret-123',
+      ENCRYPTION_KEY: process.env.ENCRYPTION_KEY ?? 'Lm5hFbtQl55RMPubYIcCcLN666+h5tL8KahFRr1KYVU=',
+      DISABLE_RATE_LIMIT: '1',
       APP_URL: 'http://localhost:3100',
     },
   },

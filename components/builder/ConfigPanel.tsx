@@ -9,12 +9,14 @@ export function ConfigPanel({
   node,
   canEdit,
   webhookUrl,
+  connections = [],
   onChange,
   onClose,
 }: {
   node: { id: string; data: CadenceNodeData }
   canEdit: boolean
   webhookUrl?: string | null
+  connections?: { id: string; type: string; name: string }[]
   onChange: (id: string, patch: Partial<CadenceNodeData>) => void
   onClose: () => void
 }) {
@@ -59,7 +61,37 @@ export function ConfigPanel({
           return (
             <div key={f.name}>
               <Label htmlFor={`f-${f.name}`}>{f.label}</Label>
-              {f.type === 'select' ? (
+              {f.type === 'connection' ? (
+                (() => {
+                  const matches = connections.filter((c) => c.type === step.connectionType)
+                  if (matches.length === 0) {
+                    return (
+                      <p className="text-sm text-muted">
+                        No {step.connectionType} connection.{' '}
+                        <a href="/app/connections" className="text-cyan">
+                          Add one
+                        </a>
+                      </p>
+                    )
+                  }
+                  return (
+                    <select
+                      id={`f-${f.name}`}
+                      value={strValue}
+                      disabled={!canEdit}
+                      onChange={(e) => setConfig(f.name, e.target.value)}
+                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-fog"
+                    >
+                      <option value="">Select a connection…</option>
+                      {matches.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  )
+                })()
+              ) : f.type === 'select' ? (
                 <select
                   id={`f-${f.name}`}
                   value={strValue}

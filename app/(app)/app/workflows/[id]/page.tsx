@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import type { Node, Edge } from '@xyflow/react'
 import { requireUser, getActiveWorkspace } from '@/lib/session'
 import { getWorkflow } from '@/lib/workflows'
+import { listConnections } from '@/lib/connections'
 import { env } from '@/lib/env'
 import { Builder } from '@/components/builder/Builder'
 
@@ -31,6 +32,7 @@ export default async function BuilderPage({ params }: { params: Promise<{ id: st
   }))
 
   const webhookUrl = wf.webhookToken ? `${env.APP_URL}/api/hooks/${wf.webhookToken}` : null
+  const connections = await listConnections(active.workspace.id)
 
   return (
     <Builder
@@ -38,6 +40,7 @@ export default async function BuilderPage({ params }: { params: Promise<{ id: st
       initialNodes={initialNodes}
       initialEdges={initialEdges}
       webhookUrl={webhookUrl}
+      connections={connections.map((c) => ({ id: c.id, type: c.type, name: c.name }))}
       canEdit={true}
     />
   )

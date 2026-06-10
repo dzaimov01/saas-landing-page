@@ -32,6 +32,7 @@ export async function rateLimit(
   key: string,
   opts: { limit: number; windowSec: number },
 ): Promise<RateLimitResult> {
+  if (process.env.DISABLE_RATE_LIMIT === '1') return { ok: true, remaining: opts.limit, retryAfter: 0 }
   const redis = getClient()
   if (!redis) return { ok: true, remaining: opts.limit, retryAfter: 0 }
 

@@ -1,7 +1,22 @@
 'use client'
 
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import { Zap, Globe, Mail, MessageSquare, Clock, GitBranch, Webhook } from 'lucide-react'
+import {
+  Zap,
+  Globe,
+  Mail,
+  MessageSquare,
+  MessageCircle,
+  Send,
+  Table,
+  FileText,
+  Sparkles,
+  Braces,
+  Filter as FilterIcon,
+  Clock,
+  GitBranch,
+  Webhook,
+} from 'lucide-react'
 import { getStepType } from '@/lib/steps/registry'
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -10,6 +25,13 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   http_request: Globe,
   send_email: Mail,
   slack_message: MessageSquare,
+  discord_message: MessageCircle,
+  telegram_message: Send,
+  airtable_create: Table,
+  notion_create: FileText,
+  openai_complete: Sparkles,
+  set_data: Braces,
+  filter: FilterIcon,
   delay: Clock,
   condition: GitBranch,
 }

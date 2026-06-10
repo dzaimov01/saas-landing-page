@@ -98,6 +98,19 @@ model Workspace {
   invitations  Invitation[]
   workflows    Workflow[]
   subscription Subscription?
+  connections  Connection[]
+}
+
+model Connection {
+  id          String    @id @default(cuid())
+  workspaceId String
+  type        String
+  name        String
+  secret      String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
 }
 
 model Subscription {

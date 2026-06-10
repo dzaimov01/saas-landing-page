@@ -28,10 +28,18 @@ export interface BuilderProps {
   initialNodes: Node[]
   initialEdges: Edge[]
   webhookUrl: string | null
+  connections: { id: string; type: string; name: string }[]
   canEdit: boolean
 }
 
-export function Builder({ workflow, initialNodes, initialEdges, webhookUrl, canEdit }: BuilderProps) {
+export function Builder({
+  workflow,
+  initialNodes,
+  initialEdges,
+  webhookUrl,
+  connections,
+  canEdit,
+}: BuilderProps) {
   const router = useRouter()
   const [running, setRunning] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
@@ -245,6 +253,7 @@ export function Builder({ workflow, initialNodes, initialEdges, webhookUrl, canE
             node={{ id: selectedNode.id, data: selectedNode.data as CadenceNodeData }}
             canEdit={canEdit}
             webhookUrl={webhookUrl}
+            connections={connections}
             onChange={updateNode}
             onClose={() => setSelectedId(null)}
           />
