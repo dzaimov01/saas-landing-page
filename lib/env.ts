@@ -19,6 +19,10 @@ const schema = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
   ENCRYPTION_KEY: z.string().optional(),
+  GOOGLE_CONNECT_CLIENT_ID: z.string().optional(),
+  GOOGLE_CONNECT_CLIENT_SECRET: z.string().optional(),
+  HUBSPOT_CLIENT_ID: z.string().optional(),
+  HUBSPOT_CLIENT_SECRET: z.string().optional(),
 })
 
 const raw = {
@@ -40,6 +44,10 @@ const raw = {
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+  GOOGLE_CONNECT_CLIENT_ID: process.env.GOOGLE_CONNECT_CLIENT_ID,
+  GOOGLE_CONNECT_CLIENT_SECRET: process.env.GOOGLE_CONNECT_CLIENT_SECRET,
+  HUBSPOT_CLIENT_ID: process.env.HUBSPOT_CLIENT_ID,
+  HUBSPOT_CLIENT_SECRET: process.env.HUBSPOT_CLIENT_SECRET,
 }
 
 /**
