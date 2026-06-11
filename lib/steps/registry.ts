@@ -195,6 +195,55 @@ export const STEP_TYPES: Record<string, StepType> = {
     handles: { source: ['out'], target: true },
   },
 
+  google_sheets_append: {
+    key: 'google_sheets_append',
+    label: 'Google Sheets row',
+    kind: 'ACTION',
+    description: 'Append a row to a Google Sheet via an OAuth connection.',
+    connectionType: 'google_sheets',
+    configSchema: z.object({
+      connectionId: z.string().min(1),
+      spreadsheetId: z.string().min(1),
+      range: z.string().min(1),
+      values: z.string().min(1),
+    }),
+    defaultConfig: { connectionId: '', spreadsheetId: '', range: 'Sheet1!A1', values: '' },
+    fields: [
+      { name: 'connectionId', label: 'Google connection', type: 'connection' },
+      { name: 'spreadsheetId', label: 'Spreadsheet ID', type: 'text' },
+      { name: 'range', label: 'Range', type: 'text', placeholder: 'Sheet1!A1' },
+      {
+        name: 'values',
+        label: 'Row values (comma-separated)',
+        type: 'text',
+        placeholder: '{{trigger.name}}, {{trigger.email}}',
+      },
+    ],
+    handles: { source: ['out'], target: true },
+  },
+
+  hubspot_create_contact: {
+    key: 'hubspot_create_contact',
+    label: 'HubSpot contact',
+    kind: 'ACTION',
+    description: 'Create a contact in HubSpot via an OAuth connection.',
+    connectionType: 'hubspot',
+    configSchema: z.object({
+      connectionId: z.string().min(1),
+      email: z.string().email(),
+      firstname: z.string().optional(),
+      lastname: z.string().optional(),
+    }),
+    defaultConfig: { connectionId: '', email: '', firstname: '', lastname: '' },
+    fields: [
+      { name: 'connectionId', label: 'HubSpot connection', type: 'connection' },
+      { name: 'email', label: 'Email', type: 'text' },
+      { name: 'firstname', label: 'First name', type: 'text' },
+      { name: 'lastname', label: 'Last name', type: 'text' },
+    ],
+    handles: { source: ['out'], target: true },
+  },
+
   set_data: {
     key: 'set_data',
     label: 'Set data',

@@ -7,6 +7,8 @@ import { setData } from './setdata'
 import { filter } from './filter'
 import { delay } from './delay'
 import { getConnector } from './index'
+import { googleSheetsAppend } from './googlesheets'
+import { hubspotCreateContact } from './hubspot'
 
 const ctx = { trigger: { amount: 10 }, steps: {} }
 
@@ -55,9 +57,46 @@ describe('utility connectors', () => {
   })
 })
 
+describe('oauth connectors', () => {
+  it('google sheets appends a row with a bearer token', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    vi.stubGlobal('fetch', fetchMock)
+    await googleSheetsAppend(
+      { spreadsheetId: 'sid', range: 'Sheet1!A1', values: 'a,b,c' },
+      ctx,
+      { accessToken: 'at' },
+    )
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('/spreadsheets/sid/values/')
+    expect(url).toContain(':append')
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer at')
+  })
+
+  it('google sheets throws without a token', async () => {
+    await expect(
+      googleSheetsAppend({ spreadsheetId: 's', range: 'A1', values: 'x' }, ctx, undefined),
+    ).rejects.toThrow(/token/i)
+  })
+
+  it('hubspot creates a contact with properties', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: '1' }) })
+    vi.stubGlobal('fetch', fetchMock)
+    await hubspotCreateContact({ email: 'a@b.com', firstname: 'A', lastname: 'B' }, ctx, { accessToken: 'at' })
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('/crm/v3/objects/contacts')
+    expect(JSON.parse(init.body as string).properties.email).toBe('a@b.com')
+  })
+
+  it('hubspot throws without a token', async () => {
+    await expect(hubspotCreateContact({ email: 'a@b.com' }, ctx, undefined)).rejects.toThrow(/token/i)
+  })
+})
+
 describe('registry', () => {
   it('resolves known connectors and throws on unknown', () => {
     expect(getConnector('discord_message')).toBe(discordMessage)
+    expect(getConnector('google_sheets_append')).toBe(googleSheetsAppend)
+    expect(getConnector('hubspot_create_contact')).toBe(hubspotCreateContact)
     expect(() => getConnector('nope')).toThrow()
   })
 })
