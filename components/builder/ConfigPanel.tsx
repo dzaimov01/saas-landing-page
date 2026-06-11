@@ -1,9 +1,37 @@
 'use client'
 
+import { useState } from 'react'
 import { getStepType } from '@/lib/steps/registry'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
+import { ScheduleConfig } from './ScheduleConfig'
+import type { ScheduleValue } from '@/lib/schedule'
 import type { CadenceNodeData } from './nodes'
+
+function ConnectionTestButton({ connectionId }: { connectionId: string }) {
+  const [result, setResult] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true)
+          setResult(null)
+          const res = await fetch(`/api/connections/${connectionId}/test`, { method: 'POST' })
+          const j = await res.json().catch(() => ({ ok: false, message: 'Error' }))
+          setResult(j.ok ? `✓ ${j.message}` : `✗ ${j.message}`)
+          setBusy(false)
+        }}
+        className="text-xs font-semibold text-cyan hover:underline"
+      >
+        {busy ? 'Testing…' : 'Test connection'}
+      </button>
+      {result && <p className="mt-1 text-xs text-muted">{result}</p>}
+    </div>
+  )
+}
 
 export function ConfigPanel({
   node,
@@ -55,6 +83,14 @@ export function ConfigPanel({
           />
         </div>
 
+        {node.data.stepType === 'schedule' ? (
+          <ScheduleConfig
+            config={config as Partial<ScheduleValue>}
+            canEdit={canEdit}
+            onChange={(patch) => onChange(node.id, { config: { ...config, ...patch } })}
+          />
+        ) : (
+          <>
         {step.fields.map((f) => {
           const value = (config as Record<string, unknown>)[f.name]
           const strValue = value === undefined || value === null ? '' : String(value)
@@ -75,20 +111,23 @@ export function ConfigPanel({
                     )
                   }
                   return (
-                    <select
-                      id={`f-${f.name}`}
-                      value={strValue}
-                      disabled={!canEdit}
-                      onChange={(e) => setConfig(f.name, e.target.value)}
-                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-fog"
-                    >
-                      <option value="">Select a connection…</option>
-                      {matches.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                    <>
+                      <select
+                        id={`f-${f.name}`}
+                        value={strValue}
+                        disabled={!canEdit}
+                        onChange={(e) => setConfig(f.name, e.target.value)}
+                        className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-fog"
+                      >
+                        <option value="">Select a connection…</option>
+                        {matches.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      {strValue && <ConnectionTestButton connectionId={strValue} />}
+                    </>
                   )
                 })()
               ) : f.type === 'select' ? (
@@ -130,6 +169,8 @@ export function ConfigPanel({
         })}
         {step.fields.length === 0 && (
           <p className="text-sm text-muted">This step has no configuration.</p>
+        )}
+          </>
         )}
       </div>
     </aside>
