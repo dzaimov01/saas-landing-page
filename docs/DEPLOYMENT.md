@@ -19,6 +19,9 @@ execution worker runs on a separate always-on host.
 - [ ] `RESEND_API_KEY` + `EMAIL_FROM` — (optional) transactional email.
 - [ ] Sentry (optional): `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, and for source maps
       `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT`.
+- [ ] OAuth connections (optional) — `GOOGLE_CONNECT_CLIENT_ID/SECRET`,
+      `HUBSPOT_CLIENT_ID/SECRET`. See step 6½ below. Without these the
+      "Connect with…" buttons are hidden and everything else still works.
 
 ## 3. Database
 - [ ] Run migrations against production once: `DATABASE_URL=... npm run db:deploy`.
@@ -42,6 +45,19 @@ execution worker runs on a separate always-on host.
 - [ ] Create a webhook endpoint in Stripe → `https://<APP_URL>/api/stripe/webhook`
       for `checkout.session.completed`, `customer.subscription.updated`,
       `customer.subscription.deleted`; set `STRIPE_WEBHOOK_SECRET`.
+
+## 6½. OAuth connections (optional — Google Sheets & HubSpot)
+- [ ] **Google** — create a **separate** OAuth client (distinct from the sign-in
+      `AUTH_GOOGLE_*` app) in Google Cloud Console. Add the **Google Sheets API**
+      and the scope `https://www.googleapis.com/auth/spreadsheets`. Register the
+      redirect URI `https://<APP_URL>/api/connections/oauth/google/callback`. Set
+      `GOOGLE_CONNECT_CLIENT_ID` / `GOOGLE_CONNECT_CLIENT_SECRET`.
+- [ ] **HubSpot** — create an app in the HubSpot developer portal with the
+      `crm.objects.contacts.read` + `crm.objects.contacts.write` scopes and the
+      redirect URI `https://<APP_URL>/api/connections/oauth/hubspot/callback`.
+      Set `HUBSPOT_CLIENT_ID` / `HUBSPOT_CLIENT_SECRET`.
+- [ ] Confirm `ENCRYPTION_KEY` is set — OAuth tokens are stored encrypted like all
+      Connection secrets.
 
 ## 7. Monitoring
 - [ ] Point an uptime monitor at `GET https://<APP_URL>/api/health` (expects 200

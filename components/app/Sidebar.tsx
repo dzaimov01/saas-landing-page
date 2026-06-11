@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { Workflow, PlayCircle, Plug, LayoutTemplate, Settings } from 'lucide-react'
+import { Workflow, PlayCircle, Plug, LayoutTemplate, BarChart3, Settings } from 'lucide-react'
 
 const items = [
   { href: '/app', label: 'Workflows', icon: Workflow },
   { href: '/app/templates', label: 'Templates', icon: LayoutTemplate },
   { href: '/app/runs', label: 'Runs', icon: PlayCircle },
+  { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/app/connections', label: 'Connections', icon: Plug },
   { href: '/app/settings/profile', label: 'Settings', icon: Settings },
 ]

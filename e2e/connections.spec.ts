@@ -26,6 +26,15 @@ test('create a connection without leaking the secret', async ({ page }) => {
   expect(await page.content()).not.toContain('SECRET123')
 })
 
+test('oauth connect buttons are hidden when providers are unconfigured', async ({ page }) => {
+  await signUp(page)
+  await page.goto('/app/connections')
+  await page.getByRole('button', { name: /add connection/i }).click()
+  // No GOOGLE_CONNECT_* / HUBSPOT_* env in the test environment → no oauth options.
+  await expect(page.getByRole('link', { name: /connect with google sheets/i })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /connect with hubspot/i })).toHaveCount(0)
+})
+
 test('use a template to create a workflow', async ({ page }) => {
   await signUp(page)
   await page.goto('/app/templates')

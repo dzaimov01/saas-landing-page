@@ -1,6 +1,9 @@
 import { db } from './db'
 import { encrypt, decrypt } from './crypto'
 import { getConnectionType } from './connections/registry'
+import { refreshAccessToken, type OAuthProviderId } from './connections/oauth'
+
+const REFRESH_SKEW_MS = 60_000
 
 export function listConnections(workspaceId: string) {
   return db.connection.findMany({
@@ -41,4 +44,32 @@ export async function getDecryptedSecret(
   const conn = await db.connection.findFirst({ where: { id: connectionId, workspaceId } })
   if (!conn) return null
   return JSON.parse(decrypt(conn.secret)) as Record<string, string>
+}
+
+/**
+ * Decrypt a connection's secret, refreshing the OAuth access token first when it is
+ * expired (within a small skew). Apikey connections pass through unchanged. The
+ * execution engine uses this so runs always receive a usable credential.
+ */
+export async function getUsableSecret(
+  connectionId: string,
+  workspaceId: string,
+): Promise<Record<string, string> | null> {
+  const conn = await db.connection.findFirst({ where: { id: connectionId, workspaceId } })
+  if (!conn) return null
+  const secret = JSON.parse(decrypt(conn.secret)) as Record<string, string>
+
+  const def = getConnectionType(conn.type)
+  if (def.auth !== 'oauth' || !def.provider) return secret
+
+  const expiresAt = Number(secret.expiresAt ?? 0)
+  if (expiresAt - Date.now() > REFRESH_SKEW_MS) return secret
+
+  const tokens = await refreshAccessToken(def.provider as OAuthProviderId, secret.refreshToken ?? '')
+  const updated = { ...secret, ...tokens }
+  await db.connection.update({
+    where: { id: conn.id },
+    data: { secret: encrypt(JSON.stringify(updated)) },
+  })
+  return updated
 }

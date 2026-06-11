@@ -2,7 +2,7 @@ import type { Prisma } from '@prisma/client'
 import { db } from '../db'
 import { getStepType } from '../steps/registry'
 import { getConnector } from '../connectors'
-import { getDecryptedSecret } from '../connections'
+import { getUsableSecret } from '../connections'
 import { resolveConfig, type RunContext } from '../template'
 import { evaluate, type ConditionConfig } from './condition'
 import { nextNodeId } from './plan'
@@ -72,7 +72,7 @@ export async function executeRun(runId: string): Promise<void> {
         const resolved = resolveConfig(config, ctx)
         let secret: Record<string, string> | undefined
         if (stepType.connectionType) {
-          const found = await getDecryptedSecret(String(config.connectionId ?? ''), run.workspaceId)
+          const found = await getUsableSecret(String(config.connectionId ?? ''), run.workspaceId)
           if (!found) throw new Error(`No connection selected for "${stepType.label}"`)
           secret = found
         }

@@ -36,11 +36,21 @@ Vitest + Playwright · deployed on Vercel.
   Starter plan and the app still works.
 - **Connections** — reusable, **encrypted** (AES-256-GCM) credentials at
   `/app/connections` for Slack, Discord, Telegram, Airtable, Notion, and OpenAI;
-  workflow steps reference a connection instead of pasting keys.
+  workflow steps reference a connection instead of pasting keys. Each connection
+  has a **Test** button that verifies the credential live.
+- **OAuth connections** — connect **Google Sheets** and **HubSpot** with a real
+  authorize → callback → token-refresh flow (tokens stored encrypted; refreshed
+  automatically before each run). The "Connect with…" buttons appear only when
+  the corresponding OAuth app is configured.
 - **Connectors** — HTTP request, email, Slack, Discord, Telegram, Airtable, Notion,
-  OpenAI (AI completion), plus utility Set-data, Filter, Delay, and Condition steps.
+  OpenAI (AI completion), Google Sheets (append row), HubSpot (create contact),
+  plus utility Set-data, Filter, Delay, and Condition steps.
+- **Scheduled triggers** — presets (every 15 min / hourly / daily / weekly /
+  custom cron), a human-readable description, and a next-run preview.
 - **Templates** — a `/app/templates` gallery of ready-to-go workflows; "Use template"
   clones one into your workspace to configure.
+- **Analytics** — a `/app/analytics` dashboard (Recharts) with success rate,
+  runs-over-time, top workflows, and monthly run usage vs plan quota.
 
 ## Prerequisites
 
@@ -108,7 +118,9 @@ See `.env.example`. Required: `DATABASE_URL`, `AUTH_SECRET`. Execution engine:
 `REDIS_URL`. Connections: `ENCRYPTION_KEY` (`openssl rand -base64 32`). Billing:
 `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, four `STRIPE_PRICE_*`. Optional:
 `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `APP_URL`,
-`SENTRY_DSN`.
+`SENTRY_DSN`. OAuth connections (optional): `GOOGLE_CONNECT_CLIENT_ID` /
+`GOOGLE_CONNECT_CLIENT_SECRET` (a **separate** Google OAuth app from sign-in) and
+`HUBSPOT_CLIENT_ID` / `HUBSPOT_CLIENT_SECRET`.
 
 ## Scripts
 
@@ -160,7 +172,9 @@ See `docs/superpowers/specs/` and `docs/superpowers/plans/` for the phased plan.
 ✅ Phase 1: workflow builder · ✅ Phase 2: execution engine + connectors ·
 ✅ Phase 3: Stripe billing + plan enforcement · ✅ Phase 4: productionization
 (security, monitoring, legal) · ✅ Phase 5: encrypted Connections, more
-integrations, and a template library.
+integrations, and a template library · ✅ Phase 6: OAuth connections (Google
+Sheets / HubSpot), per-connection testing, richer scheduled-trigger UI, and an
+analytics dashboard.
 
 ---
 

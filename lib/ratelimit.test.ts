@@ -1,7 +1,18 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { rateLimit, clientIp, __setClientForTests } from './ratelimit'
 
-afterEach(() => __setClientForTests(null))
+// These tests assert the core limiting logic, so they must not be affected by an
+// ambient DISABLE_RATE_LIMIT=1 (which CI sets job-wide for the e2e server). Control
+// the flag explicitly and restore it afterwards.
+const savedDisable = process.env.DISABLE_RATE_LIMIT
+beforeEach(() => {
+  delete process.env.DISABLE_RATE_LIMIT
+})
+afterEach(() => {
+  __setClientForTests(null)
+  if (savedDisable === undefined) delete process.env.DISABLE_RATE_LIMIT
+  else process.env.DISABLE_RATE_LIMIT = savedDisable
+})
 
 function mockRedis(count: number, ttl = 30) {
   return {
@@ -32,6 +43,15 @@ describe('rateLimit', () => {
     __setClientForTests(null)
     const res = await rateLimit('k', { limit: 1, windowSec: 60 })
     expect(res.ok).toBe(true)
+  })
+
+  it('is bypassed entirely when DISABLE_RATE_LIMIT=1', async () => {
+    process.env.DISABLE_RATE_LIMIT = '1'
+    const redis = mockRedis(6, 42) // would otherwise block
+    __setClientForTests(redis)
+    const res = await rateLimit('k', { limit: 5, windowSec: 60 })
+    expect(res.ok).toBe(true)
+    expect(redis.incr).not.toHaveBeenCalled()
   })
 })
 
