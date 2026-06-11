@@ -39,6 +39,25 @@ test('build, save, and reload a workflow', async ({ page }) => {
   await expect(page.locator('.react-flow__node')).toHaveCount(2)
 })
 
+test('schedule trigger shows a human-readable description and preset', async ({ page }) => {
+  await signUp(page)
+  await page.getByRole('button', { name: /new workflow/i }).click()
+  await page.waitForURL('**/app/workflows/**', { timeout: 30_000 })
+  await expect(page.locator('.react-flow')).toBeVisible()
+
+  // Add a Schedule trigger and open its config panel.
+  await page.getByRole('button', { name: 'Schedule', exact: true }).click()
+  await expect(page.locator('.react-flow__node')).toHaveCount(1)
+  await page.locator('.react-flow__node').first().click()
+
+  // The dedicated schedule UI exposes a Frequency preset selector.
+  await expect(page.getByLabel('Frequency')).toBeVisible()
+  await page.getByLabel('Frequency').selectOption({ label: 'Every hour' })
+  // The description/preview box renders a computed "Next run:" line for the preset.
+  await expect(page.getByText(/next run:/i)).toBeVisible()
+  await expect(page.locator('p.text-fog', { hasText: 'Every hour' })).toBeVisible()
+})
+
 test('enabling an empty workflow surfaces a validation error', async ({ page }) => {
   await signUp(page)
   await page.getByRole('button', { name: /new workflow/i }).click()
