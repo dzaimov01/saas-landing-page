@@ -6,13 +6,14 @@ beforeAll(() => {
 })
 
 const { db } = vi.hoisted(() => ({
-  db: { connection: { create: vi.fn(), findFirst: vi.fn() } },
+  db: { connection: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn() } },
 }))
 vi.mock('./db', () => ({ db }))
 
 beforeEach(() => {
   db.connection.create.mockReset()
   db.connection.findFirst.mockReset()
+  db.connection.update.mockReset()
 })
 
 describe('connections service', () => {
@@ -49,5 +50,44 @@ describe('connections service', () => {
     expect(await getDecryptedSecret('c1', 'w')).toEqual({
       webhookUrl: 'https://hooks.slack.com/secret',
     })
+  })
+})
+
+describe('getUsableSecret', () => {
+  it('returns apikey secrets unchanged', async () => {
+    const { encrypt } = await import('./crypto')
+    const { getUsableSecret } = await import('./connections')
+    db.connection.findFirst.mockResolvedValue({
+      id: 'c1',
+      type: 'slack',
+      secret: encrypt(JSON.stringify({ webhookUrl: 'https://hooks/x' })),
+    })
+    expect(await getUsableSecret('c1', 'w')).toEqual({ webhookUrl: 'https://hooks/x' })
+    expect(db.connection.update).not.toHaveBeenCalled()
+  })
+
+  it('refreshes an expired oauth token and persists it', async () => {
+    process.env.GOOGLE_CONNECT_CLIENT_ID = 'cid'
+    process.env.GOOGLE_CONNECT_CLIENT_SECRET = 'sec'
+    const { encrypt } = await import('./crypto')
+    const { getUsableSecret } = await import('./connections')
+    db.connection.findFirst.mockResolvedValue({
+      id: 'c1',
+      type: 'google_sheets',
+      secret: encrypt(
+        JSON.stringify({ accessToken: 'old', refreshToken: 'rt', expiresAt: '1000', scope: 's' }),
+      ),
+    })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ access_token: 'fresh', expires_in: 3600 }),
+      }),
+    )
+    const out = await getUsableSecret('c1', 'w')
+    expect(out?.accessToken).toBe('fresh')
+    expect(db.connection.update).toHaveBeenCalledTimes(1)
+    vi.unstubAllGlobals()
   })
 })
